@@ -1,0 +1,112 @@
+var net = require('net');
+var chunk = require('./chunk.js');
+
+var _stubs = {};
+var _clients = {};
+
+function count_dict(dict){
+	return Object.keys(dict).length;
+}
+
+function random(dict){
+	var tmp = Object.keys(dict);
+	var max = tmp.length;
+	return dict[tmp[Math.floor(Math.random() * max)]];
+}
+
+var stuber = function(id,sock,write_func){
+	var self = this;
+	this.id = id;
+	this.sock = sock;
+	this.write_func = write_func;
+	_stubs[this.id] = self;
+	this.sock.on('data',function(buff){
+						if(self.write_func != undefined){
+							self.write_func(buff);
+						}
+					});
+
+	this.sock.on('close',function(buff){
+		self.__destroy();
+	});
+
+	this.sock.on('error',function(e){
+		console.log("up err:" + e);
+		self.__destroy();
+	});
+
+	this.write = function(buff){
+		if(self.sock != undefined){
+			if(self.sock != undefined && 
+						self.sock.writable){
+				self.sock.write(buff);
+			}
+		};
+	};
+
+	this.end = function(buff){
+		if(buff != undefined){
+			self.sock.end(buff);
+		}else{
+			self.sock.end();
+		}
+		delete _stubs[this.id];
+	};
+
+	this.__destroy = function(){
+		self.sock.destroy();
+		delete _stubs[this.id];
+	}
+}
+
+
+
+///// run
+var up = net.createServer(function(sock){
+							  var chunkid = sock.remotePort;
+							  console.log("new chunk:" + chunkid + ",total:" + count_dict(_stubs));
+							  var stub = new stuber(chunkid,sock,function(data){
+							  		var clisock = random(_clients);
+							  		var tmp = new Buffer(data);
+							  		var buff = new chunk.Encoder().encode(chunkid, 0, tmp);
+							  		if(clisock != undefined && clisock.writable){
+							  			clisock.write(buff);
+							  		}
+							  });
+						 });
+up.listen(8001,"127.0.0.1");
+up.on('listening',function(){  
+	console.log("upchannel listening:" + up.address().port); 
+});
+
+
+var down = net.createServer(function(sock){
+								_clients[sock.remotePort] = sock;
+								var decoder = new chunk.Decoder(function(chunkid,type,data){
+									if(_stubs[chunkid] != undefined){
+										if(type == 0){
+											_stubs[chunkid].write(data);
+										}else{
+											_stubs[chunkid].end(data);
+										}
+									}
+								});
+
+								sock.on('data',function(data){
+									var tmp = new Buffer(data);
+									decoder.decode(tmp);
+								});
+
+								sock.on('error',function(e){
+									console.log("client err:" + e);
+								});
+
+								sock.on('close',function(){
+									console.log("client sock closed");
+									delete _clients[sock.localPort];
+								})
+							});
+down.listen(8000,"127.0.0.1");
+down.on('listening',function(){ 
+	 console.log("downchannel listening:" + down.address().port);
+});
