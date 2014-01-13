@@ -15,7 +15,12 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	});
 
 	this.write = function(data){
-		self.parser.eat(data);
+		try{
+			self.parser.eat(data);
+		}catch(e){
+
+		}
+		
 	};
 
 	this._sendrq = function(req){

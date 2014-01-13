@@ -26,7 +26,6 @@ var stuber = function(id,sock,write_func){
 	this.sock.on('data',function(buff){
 						if(self.write_func != undefined){
 							self.write_func(buff);
-							sys.log((self.id + "<<" + buff.length).green);
 						}
 					});
 
@@ -44,7 +43,6 @@ var stuber = function(id,sock,write_func){
 			if(self.sock != undefined && 
 						self.sock.writable){
 				self.sock.write(buff);
-				sys.log((self.id + ">>" + buff.length).green);
 			}
 		};
 	};

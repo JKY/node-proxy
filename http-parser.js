@@ -102,11 +102,13 @@ HTTPParser.prototype.REQUEST_LINE = function () {
   var line = this.consumeLine();
   if (line === undefined) return;
   var match = requestExp.exec(line);
-  this.info.method = match[1];
-  this.info.url = match[2];
-  this.info.versionMajor = match[3];
-  this.info.versionMinor = match[4];
-  this.state = "HEADER";
+  if(match !== null){
+      this.info.method = match[1];
+      this.info.url = match[2];
+      this.info.versionMajor = match[3];
+      this.info.versionMinor = match[4];
+      this.state = "HEADER";
+  }
 };
 var headerExp = /^([^:]+): *(.*)$/;
 HTTPParser.prototype.HEADER = function () {
