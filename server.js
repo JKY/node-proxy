@@ -2,6 +2,7 @@ var net = require('net');
 var chunk = require('./chunk.js');
 var sys = require('sys');
 var colors = require( "colors");
+var config = require( "./config.js");
 
 var _stubs = {};
 var _clients = {};
@@ -76,9 +77,10 @@ var up = net.createServer(function(sock){
 							  		}
 							  });
 						 });
-up.listen(8001,"127.0.0.1");
+
+up.listen(config['proxy_port'],config['proxy_addr']);
 up.on('listening',function(){  
-	sys.log(("up stream listening:" + up.address().port).green); 
+	sys.log(("http proxy listening on: " + config['proxy_addr'] + ":" + config['proxy_port']).green); 
 });
 
 
@@ -108,7 +110,7 @@ var down = net.createServer(function(sock){
 									delete _clients[sock.localPort];
 								})
 							});
-down.listen(8000,"127.0.0.1");
+down.listen(config['tr_port'],config['proxy_addr']);
 down.on('listening',function(){ 
-	 sys.log(("down stream listening:" + down.address().port).green);
+	 sys.log(("tranport stream listening on: " + config['proxy_addr'] + ":" + config['tr_port']).green);
 });

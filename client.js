@@ -3,11 +3,7 @@ var net = require('net');
 var chunk = require('./chunk.js');
 var sys = require('sys');
 var colors = require( "colors");
-
-
-
-var master_addr = "127.0.0.1";
-var master_port = 8000;
+var config = require( "./config.js");
 
 var ProxyClient = function(){
 	var self = this;
@@ -44,7 +40,8 @@ var ProxyClient = function(){
 	};
 
 
-	this.start = function(){
+	this.start = function(addr,port){
+		sys.log(("proxy client connecting to:" + addr + ":" + port).yellow);
 		var self = this;
 		this.sock.on('data',function(buff){
 			self.decoder.decode(buff);
@@ -65,17 +62,20 @@ var ProxyClient = function(){
 			}
 		});
 
-		this.sock.connect(master_port,master_addr,function(){
-			sys.log(("proxy client connected to:" + master_addr + ":" + master_port).green);
+		this.sock.connect(port,addr,function(){
+			sys.log(("proxy client connected to:" + addr + ":" + port).green);
 		});
 		return self;
 	}
 };
+
 /* start */
-var __proxy_client = new ProxyClient().start();
+var master_addr = config['proxy_addr'];
+var master_port = config['tr_port'];
+var __proxy_client = new ProxyClient().start(master_addr,master_port);
 setInterval(function(){
 	if(!__proxy_client.isConnected()){
-		sys.log("reconnect proxy...".yellow);
-		__proxy_client = new ProxyClient().start();
+		sys.log(("reconnect to proxy server:" + master_addr + ":" + master_port).yellow);
+		__proxy_client = new ProxyClient().start(master_addr,master_port);
 	}
-},1000);
+},5000);
