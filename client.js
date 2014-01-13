@@ -1,6 +1,10 @@
 var proxy = require('./http-proxy.js');
 var net = require('net');
 var chunk = require('./chunk.js');
+var sys = require('sys');
+var colors = require( "colors");
+
+
 
 var master_addr = "127.0.0.1";
 var master_port = 8000;
@@ -11,10 +15,7 @@ var ProxyClient = function(){
 	this.proxys = {};
 
 	this.flush = function(chunkid,type,data){
-		if(self.sock != undefined &&
-				 self.sock != null && 
-				 	 self.sock.writable && 
-				 	 	  data !== null){
+		if( self.isConnected() &&  data !== null){
 			var buff = new chunk.Encoder().encode(chunkid, type, new Buffer(data));
 			self.sock.write(buff);
 		}
@@ -38,25 +39,43 @@ var ProxyClient = function(){
 		_proxy.write(new Buffer(data));
 	});
 
+	this.isConnected = function(){
+		return self.sock != undefined && self.sock != null && self.sock.writable;
+	};
+
+
 	this.start = function(){
+		var self = this;
 		this.sock.on('data',function(buff){
 			self.decoder.decode(buff);
 		});
 
 		this.sock.on('error',function(e){
-			console.log(e);
-			sock.destrory();
+			sys.log(("client:" + e).red);
+			if(self.sock != undefined){
+				self.sock.destroy();
+			}
+			self.sock = undefined;
 		});
 
 		this.sock.on('close',function(){
-			console.log("closed");
+			sys.log("client closed".yellow);
+			if(self.sock != undefined){
+				self.sock.destroy();
+			}
 		});
 
 		this.sock.connect(master_port,master_addr,function(){
-			console.log("proxy client connected to:" + master_addr + ":" + master_port);
+			sys.log(("proxy client connected to:" + master_addr + ":" + master_port).green);
 		});
+		return self;
 	}
 };
-
-
-new ProxyClient().start();
+/* start */
+var __proxy_client = new ProxyClient().start();
+setInterval(function(){
+	if(!__proxy_client.isConnected()){
+		sys.log("reconnect proxy...".yellow);
+		__proxy_client = new ProxyClient().start();
+	}
+},1000);

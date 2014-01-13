@@ -2,6 +2,9 @@ var httpparser = require('./http-parser.js');
 var net = require('net');
 var http = require('http'),url = require('url');
 var constants = require('constants');
+var sys = require('sys');
+var colors = require( "colors");
+
 
 var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	this.id = id;
@@ -20,7 +23,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 		var _url=url.parse(req.url);
      	var _host=req.headers.host.split(":");
 
-     	console.log(req.method + " " + req.url);
+     	sys.log((req.method + " " + req.url).green);
      	var option={	
      				'host':_host[0],
      				'secureOptions': constants.SSL_OP_NO_TLSv1_2,
@@ -33,7 +36,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
         option.agent = false;
 	    http.request(option,function(res){
 	    	// write response
-	    	console.log(res.statusCode + " " + req.url);
+	    	sys.log((res.statusCode + " " + req.url).green);
 	    	headers = _flush_header(res.statusCode, res.headers);
 	    	res.on('data',function(chunk){
     			if(_header_val(headers,'transfer-encoding') == 'chunked'){
@@ -46,7 +49,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	    	});
 
 	    	res.on('error',function(e){
-	    		console.log("Http Response: " + req.url + " " + e);
+	    		sys.log(("http Response: " + req.url + " " + e).yellow);
 	    	});
 
 	    	res.on('close',function(e){
@@ -58,10 +61,10 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	    	});
 
 	    	res.socket.on('error',function(e){
-	    		console.log("Http Socket:" + e);
+	    		sys.log(("http Socket:" + e).yellow);
 	    	});
 	    }).on('error',function(e){
-	    	console.log("Http Proxy:" + e);
+	    	sys.log(("http proxy:" + e).red);
 	    	_end_with_err(505,e.toString());
 	    }).end();
 

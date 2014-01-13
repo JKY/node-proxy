@@ -1,5 +1,7 @@
 var net = require('net');
 var chunk = require('./chunk.js');
+var sys = require('sys');
+var colors = require( "colors");
 
 var _stubs = {};
 var _clients = {};
@@ -31,7 +33,7 @@ var stuber = function(id,sock,write_func){
 	});
 
 	this.sock.on('error',function(e){
-		console.log("up err:" + e);
+		sys.log(("up stream:" + e).red);
 		self.__destroy();
 	});
 
@@ -64,7 +66,7 @@ var stuber = function(id,sock,write_func){
 ///// run
 var up = net.createServer(function(sock){
 							  var chunkid = sock.remotePort;
-							  console.log("new chunk:" + chunkid + ",total:" + count_dict(_stubs));
+							  //sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
 							  var stub = new stuber(chunkid,sock,function(data){
 							  		var clisock = random(_clients);
 							  		var tmp = new Buffer(data);
@@ -76,7 +78,7 @@ var up = net.createServer(function(sock){
 						 });
 up.listen(8001,"127.0.0.1");
 up.on('listening',function(){  
-	console.log("upchannel listening:" + up.address().port); 
+	sys.log(("up stream listening:" + up.address().port).green); 
 });
 
 
@@ -98,15 +100,15 @@ var down = net.createServer(function(sock){
 								});
 
 								sock.on('error',function(e){
-									console.log("client err:" + e);
+									sys.log(("client" + e).red);
 								});
 
 								sock.on('close',function(){
-									console.log("client sock closed");
+									sys.log("client sock closed".red);
 									delete _clients[sock.localPort];
 								})
 							});
 down.listen(8000,"127.0.0.1");
 down.on('listening',function(){ 
-	 console.log("downchannel listening:" + down.address().port);
+	 sys.log(("down stream listening:" + down.address().port).green);
 });
