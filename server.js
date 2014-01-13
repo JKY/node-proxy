@@ -14,7 +14,8 @@ function count_dict(dict){
 function random(dict){
 	var tmp = Object.keys(dict);
 	var max = tmp.length;
-	return dict[tmp[Math.floor(Math.random() * max)]];
+	var key = tmp[Math.floor(Math.random() * max)];
+	return {"key":key,"sock":dict[key]};
 }
 
 var stuber = function(id,sock,write_func){
@@ -69,11 +70,14 @@ var up = net.createServer(function(sock){
 							  var chunkid = sock.remotePort;
 							  //sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
 							  var stub = new stuber(chunkid,sock,function(data){
-							  		var clisock = random(_clients);
+							  		var cli = random(_clients);
 							  		var tmp = new Buffer(data);
 							  		var buff = new chunk.Encoder().encode(chunkid, 0, tmp);
-							  		if(clisock != undefined && clisock.writable){
-							  			clisock.write(buff);
+							  		if(cli['sock'] != undefined && cli['sock'].writable){
+							  			cli['sock'].write(buff);
+							  		}else{
+							  			// remove the died clients
+							  			delete _clients[cli['key']];
 							  		}
 							  });
 						 });
