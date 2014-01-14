@@ -18,7 +18,9 @@ var ProxyClient = function(){
   			}
 			//debug
 			if(self.proxys[chunkid] != undefined){
-				self.proxys[chunkid].tx += buff.length;
+				for(var i=0;i<packs.length;i++){
+  					self.proxys[chunkid].tx += packs[i].length;
+  				}
 				self.proxys[chunkid].pl += data.length;
 				//console.log("data:" + data.length + ",pack:" + buff.length);
 				if(type != 0){
@@ -39,12 +41,12 @@ var ProxyClient = function(){
 																	    	}else{
 																	    		self.flush(_id,0,data);
 																	    	}
-																		});*/
+																		});
 		}else{
 			_proxy = self.proxys[chunkid];
 		}
 		_proxy.write(new Buffer(data));
-	},true);
+	},false);
 
 	this.isConnected = function(){
 		return self.sock != undefined && self.sock != null;

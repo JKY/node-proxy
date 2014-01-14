@@ -65,7 +65,6 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	    	});
 
 	    	res.on('end',function(){
-	    		console.log('end'.red);
 	    		_flush_data("0\r\n\r\n",true);
 	    	});
 

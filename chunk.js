@@ -110,8 +110,8 @@ var Decoder =  exports.Decoder = function(callback,debug){
 			}
 		}else{
 			var middle = this._total-this._buff_len;
-			this._buff_len = this._total;
 			data.copy(this._buff,this._buff_len,0,middle);
+			this._buff_len = this._total;
 			return this._reset(data.slice(middle,data.length));
 		}
 		return null;
@@ -127,6 +127,7 @@ var Decoder =  exports.Decoder = function(callback,debug){
 		this._state = '_init';
 		this._header_buff.fill(0);
 		this._header_offset = 0;
+		this._buff_len = 0;
 		this._total = 0;
 		return {
 					"state":"_init",

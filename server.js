@@ -99,14 +99,11 @@ var down = net.createServer(function(sock){
 								var decoded = 0;
 								_clients[sock.remotePort] = sock;
 								var decoder = new chunk.Decoder(function(chunkid,type,data){
-									console.log("decode:" + data.length);
 									decoded += data.length;
 									if(_stubs[chunkid] != undefined){
 										if(type == 0){
 											_stubs[chunkid].write(data);
 										}else{
-											console.log("=========================");
-											console.log("recved:"  + recvd + ",decoded:" +decoded + ",tx:" + _stubs[chunkid].tx);
 											_stubs[chunkid].end(data);
 											recvd = 0;
 											decoded = 0;
