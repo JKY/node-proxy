@@ -10,6 +10,9 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	this.id = id;
 	this.write_func = write_func;
 	var self = this;
+	this.tx = 0;
+	this.pl = 0;
+
 	this.parser = new httpparser.HTTPParser(httpparser.HTTPParser.REQUEST,function(req){
 		self._sendrq(req);
 	});
@@ -28,7 +31,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 		var _url=url.parse(req.url);
      	var _host=req.headers.host.split(":");
 
-     	sys.log((req.method + " " + req.url).green);
+     	sys.log((self.id + ":" + req.method + " " + req.url).green);
      	var option={	
      				'host':_host[0],
      				'secureOptions': constants.SSL_OP_NO_TLSv1_2,
@@ -41,7 +44,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
         option.agent = false;
 	    http.request(option,function(res){
 	    	// write response
-	    	sys.log((res.statusCode + " " + req.url).green);
+	    	sys.log((self.id + ":" + res.statusCode + " " + req.url).green);
 	    	headers = _flush_header(res.statusCode, res.headers);
 	    	res.on('data',function(chunk){
     			if(_header_val(headers,'transfer-encoding') == 'chunked'){
@@ -62,6 +65,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	    	});
 
 	    	res.on('end',function(){
+	    		console.log('end'.red);
 	    		_flush_data("0\r\n\r\n",true);
 	    	});
 

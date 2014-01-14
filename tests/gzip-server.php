@@ -3,7 +3,7 @@
     for($i=0;$i<2000;$i++){
         $data .= "$i\n";
     }
-    $data = $data . "";
+    $data = $data . "end";
     $gzdata = gzencode($data, 9);
     $chunk_array = str_split($gzdata, 5);
    

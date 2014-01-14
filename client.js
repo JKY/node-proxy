@@ -8,12 +8,24 @@ var config = require( "./config.js");
 var ProxyClient = function(){
 	var self = this;
 	this.sock = new net.Socket();
+	this.sock.setNoDelay(true);
 	this.proxys = {};
-
 	this.flush = function(chunkid,type,data){
 		if( self.isConnected() &&  data !== null){
-			var buff = new chunk.Encoder().encode(chunkid, type, new Buffer(data));
-			self.sock.write(buff);
+			var packs = new chunk.Encoder().encode(chunkid, type, new Buffer(data));
+			for(var i=0;i<packs.length;i++){
+  				self.sock.write(packs[i]);
+  			}
+			//debug
+			if(self.proxys[chunkid] != undefined){
+				self.proxys[chunkid].tx += buff.length;
+				self.proxys[chunkid].pl += data.length;
+				//console.log("data:" + data.length + ",pack:" + buff.length);
+				if(type != 0){
+					//console.log("==================");
+					//console.log("data:" + self.proxys[chunkid].pl + ",total:" + self.proxys[chunkid].tx);
+				}
+			}
 		}
 	};
 
@@ -28,15 +40,14 @@ var ProxyClient = function(){
 																	    		self.flush(_id,0,data);
 																	    	}
 																		});
-
 		}else{
 			_proxy = self.proxys[chunkid];
 		}
 		_proxy.write(new Buffer(data));
-	});
+	},false);
 
 	this.isConnected = function(){
-		return self.sock != undefined && self.sock != null && self.sock.writable;
+		return self.sock != undefined && self.sock != null;
 	};
 
 
@@ -50,9 +61,9 @@ var ProxyClient = function(){
 		this.sock.on('error',function(e){
 			sys.log(("client:" + e).red);
 			if(self.sock != undefined){
-				self.sock.destroy();
+				//self.sock.destroy();
 			}
-			self.sock = undefined;
+			//self.sock = undefined;
 		});
 
 		this.sock.on('close',function(){
