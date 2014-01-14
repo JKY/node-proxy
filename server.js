@@ -72,7 +72,7 @@ var stuber = function(id,sock,write_func){
 var up = net.createServer(function(sock){
 							  var chunkid = sock.remotePort;
 							  sock.setNoDelay(true);
-							  //sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
+							  sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
 							  var stub = new stuber(chunkid,sock,function(data){
 							  		var cli = random(_clients);
 							  		var tmp = new Buffer(data);

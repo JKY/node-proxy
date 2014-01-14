@@ -104,11 +104,13 @@ var Decoder =  exports.Decoder = function(callback,debug){
 		var len = data.length;
 		if( this._buff_len+len <= this._total){
 			data.copy(this._buff,this._buff_len);
+			this._buff_len += len;
 			if(this._buff_len == this._total){
 				return this._reset([]);
 			}
 		}else{
 			var middle = this._total-this._buff_len;
+			this._buff_len = this._total;
 			data.copy(this._buff,this._buff_len,0,middle);
 			return this._reset(data.slice(middle,data.length));
 		}
@@ -120,10 +122,9 @@ var Decoder =  exports.Decoder = function(callback,debug){
 			if(self._debug){
 				console.log("======= id:" + this._id + ",type:" + this._type + ",data:" + this._buff.length +  " =========");
 			}
-			this._callback(this._id, this._type, this._buff);
+			this._callback(this._id, this._type, this._buff.slice(0,this._total));
 		}
 		this._state = '_init';
-		this._buff = null;
 		this._header_buff.fill(0);
 		this._header_offset = 0;
 		this._total = 0;

@@ -32,6 +32,7 @@ var ProxyClient = function(){
 	this.decoder = new chunk.Decoder(function(chunkid,type,data){
 		var _proxy;
 		if(self.proxys[chunkid] == undefined){
+			/*
 			_proxy = self.proxys[chunkid] = new proxy.HTTPProxy(chunkid,function(_id,data,end){
 																	    	if(end === true){
 																	    		self.flush(_id,1,data);
@@ -39,12 +40,13 @@ var ProxyClient = function(){
 																	    	}else{
 																	    		self.flush(_id,0,data);
 																	    	}
-																		});
+																		});*/
 		}else{
 			_proxy = self.proxys[chunkid];
 		}
-		_proxy.write(new Buffer(data));
-	},false);
+		self.flush(chunkid,type,data);
+		//_proxy.write(new Buffer(data));
+	},true);
 
 	this.isConnected = function(){
 		return self.sock != undefined && self.sock != null;
