@@ -32,7 +32,6 @@ var ProxyClient = function(){
 	this.decoder = new chunk.Decoder(function(chunkid,type,data){
 		var _proxy;
 		if(self.proxys[chunkid] == undefined){
-			/*
 			_proxy = self.proxys[chunkid] = new proxy.HTTPProxy(chunkid,function(_id,data,end){
 																	    	if(end === true){
 																	    		self.flush(_id,1,data);
@@ -44,8 +43,7 @@ var ProxyClient = function(){
 		}else{
 			_proxy = self.proxys[chunkid];
 		}
-		self.flush(chunkid,type,data);
-		//_proxy.write(new Buffer(data));
+		_proxy.write(new Buffer(data));
 	},true);
 
 	this.isConnected = function(){
