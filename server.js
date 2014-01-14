@@ -24,6 +24,7 @@ var stuber = function(id,sock,write_func){
 	this.sock = sock;
 	this.write_func = write_func;
 	_stubs[this.id] = self;
+	this.sock.setNoDelay(true);
 	this.sock.on('data',function(buff){
 						if(self.write_func != undefined){
 							self.write_func(buff);
@@ -86,7 +87,6 @@ up.listen(config['proxy_port'],config['proxy_addr']);
 up.on('listening',function(){  
 	sys.log(("http proxy listening on: " + config['proxy_addr'] + ":" + config['proxy_port']).green); 
 });
-
 
 var down = net.createServer(function(sock){
 								_clients[sock.remotePort] = sock;

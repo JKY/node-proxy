@@ -120,10 +120,9 @@ function test_chunk(){
 	var decoder = new Decoder(function(id,type,data){
 		console.log("id:" + id + ",type:" + type +  ",chunk:" + data);
 	});
-	var data = new Encoder().encode(63085, 0, new Buffer("你好a"));
+	var data = new Encoder().encode(63085, 1, new Buffer("你好a"));
 	var split = 5;
 	decoder.decode(data.slice(0,split));
 	decoder.decode(data.slice(split,data.length));
 	decoder.decode(data);
 }
-
