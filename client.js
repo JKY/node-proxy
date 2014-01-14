@@ -16,18 +16,6 @@ var ProxyClient = function(){
 			for(var i=0;i<packs.length;i++){
   				self.sock.write(packs[i]);
   			}
-			//debug
-			if(self.proxys[chunkid] != undefined){
-				for(var i=0;i<packs.length;i++){
-  					self.proxys[chunkid].tx += packs[i].length;
-  				}
-				self.proxys[chunkid].pl += data.length;
-				//console.log("data:" + data.length + ",pack:" + buff.length);
-				if(type != 0){
-					//console.log("==================");
-					//console.log("data:" + self.proxys[chunkid].pl + ",total:" + self.proxys[chunkid].tx);
-				}
-			}
 		}
 	};
 
@@ -63,9 +51,9 @@ var ProxyClient = function(){
 		this.sock.on('error',function(e){
 			sys.log(("client:" + e).red);
 			if(self.sock != undefined){
-				//self.sock.destroy();
+				self.sock.destroy();
 			}
-			//self.sock = undefined;
+			self.sock = undefined;
 		});
 
 		this.sock.on('close',function(){

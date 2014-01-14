@@ -24,7 +24,6 @@ var stuber = function(id,sock,write_func){
 	this.sock = sock;
 	this.write_func = write_func;
 	_stubs[this.id] = self;
-	this.tx = 0;
 	this.sock.on('data',function(buff){
 						if(self.write_func != undefined){
 							self.write_func(buff);
@@ -44,7 +43,6 @@ var stuber = function(id,sock,write_func){
 		if(self.sock != undefined){
 			if(self.sock != undefined && 
 						self.sock.writable){
-				self.tx += buff.length;
 				self.sock.write(buff);
 			}
 		};
@@ -52,7 +50,6 @@ var stuber = function(id,sock,write_func){
 
 	this.end = function(buff){
 		if(buff != undefined){
-			self.tx += buff.length;
 			self.sock.end(buff);
 		}else{
 			self.sock.end();
@@ -71,8 +68,8 @@ var stuber = function(id,sock,write_func){
 ///// run
 var up = net.createServer(function(sock){
 							  var chunkid = sock.remotePort;
-							  sock.setNoDelay(true);
-							  sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
+							  //sock.setNoDelay(true);
+							  //sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
 							  var stub = new stuber(chunkid,sock,function(data){
 							  		var cli = random(_clients);
 							  		var tmp = new Buffer(data);
@@ -94,26 +91,20 @@ up.on('listening',function(){
 });
 
 var down = net.createServer(function(sock){
-								sock.setNoDelay(true);
-								var recvd = 0;
-								var decoded = 0;
+								//sock.setNoDelay(true);
 								_clients[sock.remotePort] = sock;
 								var decoder = new chunk.Decoder(function(chunkid,type,data){
-									decoded += data.length;
 									if(_stubs[chunkid] != undefined){
 										if(type == 0){
 											_stubs[chunkid].write(data);
 										}else{
 											_stubs[chunkid].end(data);
-											recvd = 0;
-											decoded = 0;
 										}
 									}
 								},false);
 
 								sock.on('data',function(data){
 									var tmp = new Buffer(data);
-									recvd += tmp.length;
 									decoder.decode(tmp);
 								});
 
