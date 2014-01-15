@@ -14,10 +14,84 @@ function count_dict(dict){
 function random(dict){
 	var tmp = Object.keys(dict);
 	var max = tmp.length;
+	if(max == 0){
+		return null;
+	}
 	var key = tmp[Math.floor(Math.random() * max)];
-	return {"key":key,"sock":dict[key]};
+	return dict[key];
 }
 
+function __delete_client(id){
+	delete _clients[id];
+	sys.log(("client delete [" + id + "],count:" + count_dict(_clients)).red);
+};
+
+
+/** downer **/
+var agent = function(sock){
+	this.id = sock.remoteAddress;
+	this.sock = sock;
+	this.echo_timestamp = new Date().getTime();
+	var self = this;
+
+	this.start = function(){
+		sys.log(("client connected [" + this.id + "]").green);
+		_clients[this.id] = self;
+		this.decoder = new chunk.Decoder(function(chunkid,type,data){
+									if(type == 3){
+										//echo package
+										self.echo_timestamp = new Date().getTime();
+									}else{
+										if(_stubs[chunkid] != undefined){
+											if(type == 0){
+												_stubs[chunkid].write(data);
+											}else{
+												_stubs[chunkid].end(data);
+											}
+										}
+									}
+								},false);
+
+		self.sock.on('data',function(data){
+			var tmp = new Buffer(data);
+			self.decoder.decode(tmp);
+		});
+
+		self.sock.on('error',function(e){
+			sys.log(("client" + e).red);
+			self.destroy();
+		});
+
+		self.sock.on('close',function(){
+			self.destroy();
+		});
+
+		self.timer = setInterval(function(){
+			var now = new Date().getTime();
+			if(now - self.echo_timestamp > config['alive_time_out']){
+				sys.log(("client [" + self.id + "] timeout").yellow);
+				self.destroy();
+			}else{
+				var alive = new chunk.Encoder().pack(config['alive_chunkid'], 3, new Buffer("alive"));
+				self.sock.write(alive);
+			}
+		},config['alive_pack_intv']);
+	};
+
+	this.write = function(data){
+		return this.sock.write(data);
+	};
+
+	this.destroy = function(){
+		sys.log("client sock closed".red);
+		if(self.timer != undefined){
+			clearInterval(self.timer);
+		};
+		__delete_client(this.id);
+	}
+};
+
+/** upper **/
 var stuber = function(id,sock,write_func){
 	var self = this;
 	this.id = id;
@@ -60,6 +134,7 @@ var stuber = function(id,sock,write_func){
 	this.__destroy = function(){
 		self.sock.destroy();
 		delete _stubs[this.id];
+		sys.log(("stub [" + self.id + "] __destroy, count:" +  count_dict(_stubs)).green);
 	}
 }
 
@@ -69,20 +144,18 @@ var stuber = function(id,sock,write_func){
 var up = net.createServer(function(sock){
 							  var chunkid = sock.remotePort;
 							  //sock.setNoDelay(true);
-							  //sys.log(("new chunk:" + chunkid + ",total:" + count_dict(_stubs)).green);
 							  var stub = new stuber(chunkid,sock,function(data){
 							  		var cli = random(_clients);
-							  		var tmp = new Buffer(data);
-							  		var packs = new chunk.Encoder().encode(chunkid, 0, tmp);
-							  		if(cli['sock'] != undefined && cli['sock'].writable){
-							  			for(var i=0;i<packs.length;i++){
-							  				cli['sock'].write(packs[i]);
-							  			}
+							  		if(cli == null){
+							  			stub.end();
 							  		}else{
-							  			// remove the died clients
-							  			delete _clients[cli['key']];
+								  		var packs = new chunk.Encoder().encode(chunkid, 0, new Buffer(data));
+								  		for(var i=0;i<packs.length;i++){
+								  			cli.write(packs[i]);
+								  		}
 							  		}
 							  });
+							  sys.log(("new stub:" + chunkid + ",count:" + count_dict(_stubs)).green);
 						 });
 
 up.listen(config['proxy_port'],config['proxy_addr']);
@@ -90,32 +163,9 @@ up.on('listening',function(){
 	sys.log(("http proxy listening on: " + config['proxy_addr'] + ":" + config['proxy_port']).green); 
 });
 
+
 var down = net.createServer(function(sock){
-								//sock.setNoDelay(true);
-								_clients[sock.remotePort] = sock;
-								var decoder = new chunk.Decoder(function(chunkid,type,data){
-									if(_stubs[chunkid] != undefined){
-										if(type == 0){
-											_stubs[chunkid].write(data);
-										}else{
-											_stubs[chunkid].end(data);
-										}
-									}
-								},false);
-
-								sock.on('data',function(data){
-									var tmp = new Buffer(data);
-									decoder.decode(tmp);
-								});
-
-								sock.on('error',function(e){
-									sys.log(("client" + e).red);
-								});
-
-								sock.on('close',function(){
-									sys.log("client sock closed".red);
-									delete _clients[sock.localPort];
-								})
+								new agent(sock).start();
 							});
 down.listen(config['tr_port'],config['proxy_addr']);
 down.on('listening',function(){ 

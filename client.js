@@ -20,20 +20,27 @@ var ProxyClient = function(){
 	};
 
 	this.decoder = new chunk.Decoder(function(chunkid,type,data){
-		var _proxy;
-		if(self.proxys[chunkid] == undefined){
-			_proxy = self.proxys[chunkid] = new proxy.HTTPProxy(chunkid,function(_id,data,end){
-																	    	if(end === true){
-																	    		self.flush(_id,1,data);
-																	    		delete self.proxys[_id];
-																	    	}else{
-																	    		self.flush(_id,0,data);
-																	    	}
-																		});
+		if(chunkid == 0){
+			if(type == 3){
+				//keep alive
+				self.flush(0,3,new Buffer("alive"));
+			}
 		}else{
-			_proxy = self.proxys[chunkid];
+			var _proxy;
+			if(self.proxys[chunkid] == undefined){
+				_proxy = self.proxys[chunkid] = new proxy.HTTPProxy(chunkid,function(_id,data,end){
+																		    	if(end === true){
+																		    		self.flush(_id,1,data);
+																		    		delete self.proxys[_id];
+																		    	}else{
+																		    		self.flush(_id,0,data);
+																		    	}
+																			});
+			}else{
+				_proxy = self.proxys[chunkid];
+			}
+			_proxy.write(new Buffer(data));
 		}
-		_proxy.write(new Buffer(data));
 	},false);
 
 	this.isConnected = function(){
