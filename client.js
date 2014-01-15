@@ -37,7 +37,7 @@ var ProxyClient = function(){
 	},false);
 
 	this.isConnected = function(){
-		return self.sock != undefined && self.sock != null;
+		return self.sock != undefined && self.sock != null && self.sock.writable;
 	};
 
 
