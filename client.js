@@ -26,6 +26,7 @@ var ProxyClient = function(){
 				//keep alive
 				self.flush(0,3,new Buffer("alive"));
 				self.last_alive = new Date().getTime();
+				sys.log("alive echo".green);
 			}
 		}else{
 			var _proxy;
@@ -47,10 +48,10 @@ var ProxyClient = function(){
 
 	this.isConnected = function(){
 		var now = new Date().getTime();
-		return self.sock != undefined && 
+		return (self.sock != undefined && 
 					self.sock != null && 
 							self.sock.writable && 
-								(this.last_alive - now < config['alive_time_out']); 
+								(now - self.last_alive  < config['alive_time_out'])); 
 	};
 
 
