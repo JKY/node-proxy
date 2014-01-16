@@ -10,6 +10,7 @@ var ProxyClient = function(){
 	this.sock = new net.Socket();
 	this.sock.setNoDelay(true);
 	this.proxys = {};
+	this.last_alive = new Date().getTime();
 	this.flush = function(chunkid,type,data){
 		if( self.isConnected() &&  data !== null){
 			var packs = new chunk.Encoder().encode(chunkid, type, new Buffer(data));
@@ -24,6 +25,7 @@ var ProxyClient = function(){
 			if(type == 3){
 				//keep alive
 				self.flush(0,3,new Buffer("alive"));
+				self.last_alive = new Date().getTime();
 			}
 		}else{
 			var _proxy;
@@ -44,7 +46,11 @@ var ProxyClient = function(){
 	},false);
 
 	this.isConnected = function(){
-		return self.sock != undefined && self.sock != null && self.sock.writable;
+		var now = new Date().getTime();
+		return self.sock != undefined && 
+					self.sock != null && 
+							self.sock.writable && 
+								(this.last_alive - now < config['alive_time_out']); 
 	};
 
 
