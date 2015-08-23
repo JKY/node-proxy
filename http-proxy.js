@@ -34,7 +34,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
      	sys.log((self.id + ":" + req.method + " " + req.url).green);
      	var option={	
      				'host':_host[0],
-     				//'secureOptions': constants.SSL_OP_NO_TLSv1_2,
+     				'secureOptions': constants.SSL_OP_NO_SSLv3|constants.SSL_OP_NO_SSLv2,
                   	'port':Number(_host[1]||'80'),
                   	'path':_url['pathname']+(_url['search']||""),
                   	'method':req.method,
