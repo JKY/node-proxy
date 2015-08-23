@@ -5,10 +5,8 @@ var constants = require('constants');
 var sys = require('sys');
 var colors = require( "colors");
 
-https.globalAgent.maxSockets = 1000;
-http.globalAgent.maxSockets = 1000;
 
-var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
+var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	this.id = id;
 	this.write_func = write_func;
 	var self = this;
@@ -36,9 +34,9 @@ var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
      	sys.log((self.id + ":" + req.method + " " + req.url).green);
      	var client = http;
      	var port = Number(_host[1]||'80');
-        if(usehttps){
+        if(_host[0].indexOf('https') >= 0){
         	client = https;
-        	port = 443;
+        	port = Number(_host[1]||'443');
         }
      	var option={	
      				'host':_host[0],
@@ -49,7 +47,6 @@ var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
                   	'headers':req.headers,
                   	'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
                   };
-        option.agent = false;
 	    client.request(option,function(res){
 	    	// write response
 	    	sys.log((self.id + ":" + res.statusCode + " " + req.url).green);

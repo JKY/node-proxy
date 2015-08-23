@@ -38,20 +38,10 @@ var StandProxy = function(addr){
 				client1.write(buff);
 			});
 		});
-		this.https_proxy = net.createServer(function(sock){
-			var client2 = new proxy.HTTPProxy(0,true,new Writer(sock).output);
-			sock.on('data',function(buff){
-				client2.write(buff);
-			});
-		});
 		this.http_proxy.on('listening',function(){ 
 			sys.debug("http proxy listening on port:" + self.http_proxy.address().port);
 		});
-		this.https_proxy.on('listening',function(){ 
-			sys.debug("https proxy listening on port:" + self.https_proxy.address().port);
-		});
 		this.http_proxy.listen(8080,addr);
-		this.https_proxy.listen(8081,addr);
 	};
 
 	this.stop = function(){
