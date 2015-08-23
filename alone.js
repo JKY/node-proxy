@@ -7,11 +7,15 @@ var net = require('net');
 var Writer = function(sock){
 	this.output = function(id,data,end){
     	if(end === true){
-    		if(data !== null){
-    			sock.end(data);
-    		}else{
-    			sock.end();
-    		}
+    		try{
+	    		if(data !== null){
+	    			sock.end(data);
+	    		}else{
+	    			sock.end();
+	    		}
+	    	}catch(e){
+	    		
+	    	}
     	}else{
     		if(sock != undefined &&
     				 sock != null && 
@@ -58,4 +62,4 @@ var StandProxy = function(addr){
 	}
 };
 
-new StandProxy('127.0.0.1').start();
+new StandProxy('139.162.21.206').start();
