@@ -4,7 +4,7 @@ var http = require('http'),https = require('https'),url = require('url');
 var constants = require('constants');
 var sys = require('sys');
 var colors = require( "colors");
-
+https.globalAgent.options.secureProtocol = 'SSLv3_method';
 
 var HTTPProxy = exports.HTTPProxy = function(id,write_func){
 	this.id = id;
