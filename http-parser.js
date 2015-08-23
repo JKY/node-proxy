@@ -97,15 +97,15 @@ HTTPParser.prototype.consumeLine = function () {
     return line;
   }
 }
-var requestExp = /^([A-Z]+) (.*) HTTP\/([0-9]).([0-9])$/;
+var requestExp = /^([A-Z]+) (.*) HTTP(S)?\/([0-9]).([0-9])$/;
 HTTPParser.prototype.REQUEST_LINE = function () {
   var line = this.consumeLine();
   if (line === undefined) return;
   var match = requestExp.exec(line);
   this.info.method = match[1];
-  this.info.url = match[2];
-  this.info.versionMajor = match[3];
-  this.info.versionMinor = match[4];
+  this.info.url = match[3];
+  this.info.versionMajor = match[4];
+  this.info.versionMinor = match[5];
   this.state = "HEADER";
 };
 var headerExp = /^([^:]+): *(.*)$/;
