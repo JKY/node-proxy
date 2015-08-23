@@ -43,11 +43,12 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
                   	'headers':req.headers,
                   	'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
                   };
-        if(_host[0].indexOf('https') >= 0){
+        if(req.url.indexOf('https') >= 0){
         	client = https;
         	option['port'] = Number(_host[1]||'443');
         	option['secureProtocol'] = 'SSLv3_method';
         };
+        console.log(req.url);
         console.log(option);
 	    client.request(option,function(res){
 	    	// write response
