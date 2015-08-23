@@ -31,7 +31,7 @@ var StandProxy = function(addr){
 		this.http_proxy = net.createServer(function(sock){
 			var client1 = new proxy.HTTPProxy(0,false,new Writer(sock).output);
 			sock.on('data',function(buff){
-				client12.write(buff);
+				client1.write(buff);
 			});
 		});
 		this.https_proxy = net.createServer(function(sock){
