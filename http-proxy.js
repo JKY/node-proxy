@@ -34,10 +34,6 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
      	sys.log((self.id + ":" + req.method + " " + req.url).green);
      	var client = http;
      	var port = Number(_host[1]||'80');
-        if(_host[0].indexOf('https') >= 0){
-        	client = https;
-        	port = Number(_host[1]||'443');
-        }
      	var option={	
      				'host':_host[0],
      				//'secureOptions': constants.SSL_OP_NO_SSLv3|constants.SSL_OP_NO_SSLv2,
@@ -47,6 +43,12 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
                   	'headers':req.headers,
                   	'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
                   };
+        if(_host[0].indexOf('https') >= 0){
+        	client = https;
+        	option['port'] = Number(_host[1]||'443');
+        	option['secureProtocol'] = 'SSLv3_method';
+        };
+        console.log(option);
 	    client.request(option,function(res){
 	    	// write response
 	    	sys.log((self.id + ":" + res.statusCode + " " + req.url).green);
