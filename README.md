@@ -9,4 +9,8 @@ nodejs 写的http代理, 使没有公网ip的机器也能充当代理服务器.
 
 3) 将浏览器或者其它程序的http代理设置成server的ip和对应的port即可.
 
+单机
+===========
+node alone.js
+
 
