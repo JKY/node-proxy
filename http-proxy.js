@@ -5,6 +5,8 @@ var constants = require('constants');
 var sys = require('sys');
 var colors = require( "colors");
 
+https.globalAgent.maxSockets = 1000;
+http.globalAgent.maxSockets = 1000;
 
 var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
 	this.id = id;
