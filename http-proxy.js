@@ -34,20 +34,22 @@ var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
      	var _host=req.headers.host.split(":");
 
      	sys.log((self.id + ":" + req.method + " " + req.url).green);
+     	var client = http;
+     	var port = Number(_host[1]||'80');
+        if(usehttps){
+        	client = https;
+        	port = 443;
+        }
      	var option={	
      				'host':_host[0],
      				'secureOptions': constants.SSL_OP_NO_SSLv3|constants.SSL_OP_NO_SSLv2,
-                  	'port':Number(_host[1]||'80'),
+                  	'port':,
                   	'path':_url['pathname']+(_url['search']||""),
                   	'method':req.method,
                   	'headers':req.headers,
                   	'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
                   };
         option.agent = false;
-        var client = http;
-        if(usehttps){
-        	client = https;
-        }
 	    client.request(option,function(res){
 	    	// write response
 	    	sys.log((self.id + ":" + res.statusCode + " " + req.url).green);
