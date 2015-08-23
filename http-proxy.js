@@ -42,7 +42,7 @@ var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
         }
      	var option={	
      				'host':_host[0],
-     				'secureOptions': constants.SSL_OP_NO_SSLv3|constants.SSL_OP_NO_SSLv2,
+     				//'secureOptions': constants.SSL_OP_NO_SSLv3|constants.SSL_OP_NO_SSLv2,
                   	'port':port,
                   	'path':_url['pathname']+(_url['search']||""),
                   	'method':req.method,
