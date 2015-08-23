@@ -14,7 +14,7 @@ var Writer = function(sock){
 	    			sock.end();
 	    		}
 	    	}catch(e){
-	    		
+
 	    	}
     	}else{
     		if(sock != undefined &&
@@ -33,7 +33,7 @@ var StandProxy = function(addr){
 	this.start = function(){
 		var self = this;
 		this.http_proxy = net.createServer(function(sock){
-			var client1 = new proxy.HTTPProxy(0,false,new Writer(sock).output);
+			var client1 = new proxy.HTTPProxy(0,new Writer(sock).output);
 			sock.on('data',function(buff){
 				client1.write(buff);
 			});
