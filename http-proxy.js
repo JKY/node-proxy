@@ -1,12 +1,12 @@
 var httpparser = require('./http-parser.js');
 var net = require('net');
-var http = require('http'),url = require('url');
+var http = require('http'),https = require('https'),url = require('url');
 var constants = require('constants');
 var sys = require('sys');
 var colors = require( "colors");
 
 
-var HTTPProxy = exports.HTTPProxy = function(id,write_func){
+var HTTPProxy = exports.HTTPProxy = function(id,usehttps,write_func){
 	this.id = id;
 	this.write_func = write_func;
 	var self = this;
@@ -42,7 +42,11 @@ var HTTPProxy = exports.HTTPProxy = function(id,write_func){
                   	'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
                   };
         option.agent = false;
-	    http.request(option,function(res){
+        var client = http;
+        if(usehttps){
+        	client = https;
+        }
+	    client.request(option,function(res){
 	    	// write response
 	    	sys.log((self.id + ":" + res.statusCode + " " + req.url).green);
 	    	headers = _flush_header(res.statusCode, res.headers);
